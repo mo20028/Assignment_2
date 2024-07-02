@@ -1,1 +1,5 @@
-# ST Assignment_2
+# Femto shell
+
+## features
+-  Executing external commands
+-  
