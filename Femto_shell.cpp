@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -54,25 +55,55 @@ int main()
         {
             continue;
         }
-        // exit the program
-        if (cmd == "exit")
-        {
-            break;
-        }
         // sign a new var to local vars
         if(equal_sign(cmd,key,val))
         {
-            local_var.push_back({key,val});
+            bool f=1;
+            // if var exist overwrite on it 
+            for(int i=0;i<local_var.size();i++)
+            {
+                if(local_var[i].first == key)
+                {
+                    local_var[i].second = val;
+                    f=0;
+                }
+            }
+            // if var not exist add to local var
+            if(f)
+                local_var.push_back({key,val});
         }
 
         V_cmd = split_command(cmd);
-        
+        // exit the program
+        if (V_cmd[0] == "exit")
+        {
+            break;
+        }
+        // set command 
         if(V_cmd[0]=="set")
         {
             for(int i=0;i<local_var.size();i++)
             {
                 cout<<"local_var["<<i<<"] : "<<local_var[i].first<<" = "<<local_var[i].second<<endl;
             }
+        }
+        // export command
+        if(V_cmd[0] == "export")
+        {
+            bool f=1;
+           for(const auto v:local_var)
+           {
+                if(v.first == V_cmd[1])
+                {
+                    // add local var to env
+                    setenv(v.first.c_str(),v.second.c_str(),1);
+                    f=0;
+                }
+           }
+           if(f)
+           {
+            cout<<"couldn't export "<<V_cmd[1]<<" doesn't exist"<<endl;
+           }
         }
         // Convert the vector of strings to a vector of char*
         std::vector<char *> Args;
